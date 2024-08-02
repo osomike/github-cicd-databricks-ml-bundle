@@ -56,13 +56,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: install dependencies
+      - name: Install dependencies
         run: |
-          echo "Hi I am Oscar!"
           sudo apt update
           sudo apt install curl unzip -y
           python -m pip install --upgrade pip
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Verify installations
+        run: |
           databricks --version
           databricks bundle init --help
           # databricks bundle init --config-file xxx
