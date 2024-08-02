@@ -69,3 +69,4 @@ jobs:
           databricks bundle init --help
           # databricks bundle init --config-file xxx
           # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
+          # also check this https://github.com/databricks/mlops-stacks
