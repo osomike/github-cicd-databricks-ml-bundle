@@ -69,11 +69,10 @@ jobs:
           # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
           # also check this https://github.com/databricks/mlops-stacks
 
-      - name: Create configuration
+      - name: List clusters
+        env:
+          DATABRICKS_HOST: ${{ vars.AZURE_DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.AZURE_DATABRICKS_SP_TOKEN }}
         run: |
-          echo "Token"
-          echo ${{ secrets.AZURE_DATABRICKS_SP_TOKEN }}
-          echo "Databricks host"
-          echo ${{ vars.AZURE_DATABRICKS_HOST }}
-
-
+          databricks repos list
+          databricks clusters list
