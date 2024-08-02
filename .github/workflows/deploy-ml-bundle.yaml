@@ -59,8 +59,8 @@ jobs:
       - name: install dependencies
         run: |
           echo "Hi I am Oscar!"
-          apt-get update
-          apt install curl unzip -y
+          sudo apt update
+          sudo apt install curl unzip -y
           python -m pip install --upgrade pip
           https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh
           databricks --version
