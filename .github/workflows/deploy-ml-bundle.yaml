@@ -27,11 +27,9 @@ on:
         description: Environment where the bundle will be deployed
         options:
           - dev
-          - test
-          - acc
           - prd
         required: true
-        default: batch
+        default: dev
 
 env:
   PYTHON_VERSION: '3.10'
@@ -44,7 +42,7 @@ jobs:
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    environment: prd
+    environment: ${{ inputs.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -70,3 +68,12 @@ jobs:
           # databricks bundle init --config-file xxx
           # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
           # also check this https://github.com/databricks/mlops-stacks
+
+      - name: Create configuration
+        run: |
+          echo "Token"
+          echo ${{ secrets.AZURE_DATABRICKS_SP_TOKEN }}
+          echo "Databricks host"
+          echo ${{ variables.AZURE_DATABRICKS_HOST }}
+
+
