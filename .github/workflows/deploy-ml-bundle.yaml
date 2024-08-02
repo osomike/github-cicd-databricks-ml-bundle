@@ -38,7 +38,7 @@ on:
 jobs:
 
   ################################################# Job called "test"
-  migration:
+  deploy-bundle:
 
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -52,3 +52,10 @@ jobs:
       - name: install dependencies
         run: |
           echo "Hi I am Oscar!"
+          apt-get update
+          apt install curl unzip -y
+          https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh
+          databricks --version
+          databricks bundle init --help
+          # databricks bundle init --config-file xxx
+          # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
