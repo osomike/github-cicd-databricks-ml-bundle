@@ -68,6 +68,7 @@ jobs:
           # databricks bundle init --config-file xxx
           # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
           # also check this https://github.com/databricks/mlops-stacks
+          # and also this https://gist.github.com/DaniJG/b21170482545ad8c93874d164fd97a90
 
       - name: List clusters
         env:
