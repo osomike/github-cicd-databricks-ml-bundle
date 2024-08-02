@@ -74,6 +74,6 @@ jobs:
           echo "Token"
           echo ${{ secrets.AZURE_DATABRICKS_SP_TOKEN }}
           echo "Databricks host"
-          echo ${{ variables.AZURE_DATABRICKS_HOST }}
+          echo ${{ vars.AZURE_DATABRICKS_HOST }}
 
 
