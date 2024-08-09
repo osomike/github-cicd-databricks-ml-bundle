@@ -38,6 +38,22 @@ env:
 jobs:
 
   ################################################# Job called "test"
+  create-repo:
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Creating GitHub Organization Repository
+        uses: repo-ctrl/create-repo-action@main 
+        id: create-repo
+        with:
+          repo-name: '${{ inputs.project-name }}'
+          org-admin-token: '${{ secrets.ADMIN_GITHUB_TOKEN }}'
+      - name: Log URL to the repo
+        run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
+
   deploy-bundle:
 
     # The type of runner that the job will run on
