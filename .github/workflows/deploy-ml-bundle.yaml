@@ -45,14 +45,6 @@ jobs:
     environment: ${{ inputs.environment }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # - name: Creating GitHub Organization Repository
-      #   uses: repo-ctrl/create-repo-action@main 
-      #   id: create-repo
-      #   with:
-      #     repo-name: '${{ inputs.project-name }}'
-      #     org-admin-token: '${{ secrets.ADMIN_GITHUB_TOKEN }}'
-      # - name: Log URL to the repo
-      #   run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
@@ -68,7 +60,7 @@ jobs:
           git add README.md
           git commit -m "initialize the repository"
           git branch
-          git remote add origin git@github.com:osomike/${{ inputs.project-name }}.git
+          git remote add origin "https://osomike:$GH_TOKEN@github.com/osomike/${{ inputs.project-name }}.git"
           git push -u origin main
 
   deploy-bundle:
