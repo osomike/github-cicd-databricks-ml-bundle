@@ -53,7 +53,7 @@ jobs:
           echo "CODE is ${{ secrets.ADMIN_GITHUB_TOKEN }}"
           echo "CODE is ${{ inputs.project-name }}"
           gh repo create ${{ inputs.project-name }} --public --description "ML project for ${{ inputs.project-name }} "
-          git config --global user.email "osito@gmail.com"
+          git config --global user.email "mike.claure@gmail.com"
           git config --global user.name "Oscar Mike"
           echo "## This is a new repo" > README.md
           git init -b main
