@@ -54,12 +54,17 @@ jobs:
       # - name: Log URL to the repo
       #   run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         run: |
-          git config --global init.defaultBranch main
+          sudo apt install gh -y
+          echo "CODE is ${{ secrets.ADMIN_GITHUB_TOKEN }}"
+          echo "CODE is ${{ inputs.project-name }}"
+          #gh repo create github-creation-test --public --description "lalalala"
           git config --global user.email "osito@gmail.com"
           git config --global user.name "Oscar Mike"
-          echo "## This is a new repo!" >> README.md
-          git init
+          echo "## This is a new repo" > README.md
+          git init -b main
           git add README.md
           git commit -m "initialize the repository"
           ls
