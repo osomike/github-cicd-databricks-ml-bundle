@@ -55,6 +55,9 @@ jobs:
       #   run: echo "The new repo is ${{ steps.create-repo.outputs.repo-url }}"
       - name: Install dependencies
         run: |
+          git config --global init.defaultBranch main
+          git config --global user.email "osito@gmail.com"
+          git config --global user.name "Oscar Mike"
           echo "## This is a new repo!" >> README.md
           git init
           git add README.md
