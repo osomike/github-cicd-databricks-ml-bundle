@@ -1,114 +1,88 @@
-# This is a basic workflow to help you get started with Actions
-
 name: deploy-ml-bundle
 
-# Controls when the workflow will run
 on:
-
   workflow_dispatch:
     inputs:
-      project-name:
+      project_name:
         type: string
+        description: Project name
         required: true
-      feature-store:
-        type: boolean
+      model_schema:
+        type: string
+        description: Schema to use when registering a model in Unity Catalog
         required: true
-        default: false
-      inference:
+      inference_table:
+        type: string
+        description: Fully qualified name of inference table in Unity Catalog
+        required: true
+      include_feature_store:
         type: choice
-        description: Type of inference required whle serving the model
+        description: Whether to include Feature Store
         options:
-          - batch
-          - streaming
+          - "no"
+          - "yes"
+        default: "no"
         required: true
-        default: batch
-      environment:
-        type: choice
-        description: Environment where the bundle will be deployed
-        options:
-          - dev
-          - prd
-        required: true
-        default: dev
 
 env:
-  PYTHON_VERSION: '3.10'
+  PYTHON_VERSION: "3.10"
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-
-
   create-repo:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Create repository
         env:
           GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         run: |
           sudo apt install gh -y
-          echo "CODE is ${{ secrets.ADMIN_GITHUB_TOKEN }}"
-          echo "CODE is ${{ inputs.project-name }}"
-          gh repo create ${{ inputs.project-name }} --public --description "ML project for ${{ inputs.project-name }} "
+          gh repo create ${{ inputs.project_name }} --public --description "ML project for ${{ inputs.project_name }} "
 
   initialize-repo:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    needs: [create-repo]
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    needs: create-repo
     steps:
-      - name: Initialize repository
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Initialize bundle
         env:
-          GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_STAGING_WORKSPACE_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          git config --global user.email "mike.claure@gmail.com"
-          git config --global user.name "Oscar Mike"
-          echo "## This is a new repo" > README.md
-          git init -b main
-          git add README.md
-          git commit -m "initialize the repository"
-          git remote add origin "https://osomike:$GH_TOKEN@github.com/osomike/${{ inputs.project-name }}.git"
-          git push -u origin main
-
-  deploy-bundle:
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Check out source code
-        uses: actions/checkout@v4
-
-      - name: Setup Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install curl unzip -y
-          python -m pip install --upgrade pip
-          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-
-      - name: Verify installations
-        run: |
-          databricks --version
-          databricks bundle init --help
-          # databricks bundle init --config-file xxx
-          # read this https://docs.databricks.com/en/dev-tools/bundles/settings.html#bundle-syntax-mappings
+          echo '{
+            "input_setup_cicd_and_project": "CICD_and_Project",
+            "input_project_name": "${{ inputs.project_name }}",
+            "input_cloud": "${{ vars.DATABRICKS_CLOUD }}",
+            "input_cicd_platform": "${{ vars.DATABRICKS_CICD_PLATFORM }}",
+            "input_databricks_staging_workspace_host": "${{ vars.DATABRICKS_STAGING_WORKSPACE_HOST }}",
+            "input_databricks_prod_workspace_host": "${{ vars.DATABRICKS_PROD_WORKSPACE_HOST }}",
+            "input_default_branch": "main",
+            "input_release_branch": "release",
+            "input_read_user_group": "${{ vars.DATABRICKS_READ_USER_GROUP }}",
+            "input_include_models_in_unity_catalog": "yes",
+            "input_staging_catalog_name": "${{ vars.DATABRICKS_STAGING_CATALOG_NAME }}",
+            "input_prod_catalog_name": "${{ vars.DATABRICKS_PROD_CATALOG_NAME }}",
+            "input_test_catalog_name": "${{ vars.DATABRICKS_TEST_CATALOG_NAME }}",
+            "input_schema_name": "${{ inputs.model_schema }}",
+            "input_unity_catalog_read_user_group": "${{ vars.DATABRICKS_UNITY_CATALOG_READ_USER_GROUP }}",
+            "input_inference_table_name": "${{ inputs.inference_table }}",
+            "input_include_feature_store": "${{ inputs.include_feature_store }}"
+          }' > config.json
+          databricks bundle init mlops-stacks --config-file config.json
+          # read this https://docs.databricks.com/en/dev-tools/bundles/mlops-stacks.html
           # also check this https://github.com/databricks/mlops-stacks
           # and also this https://gist.github.com/DaniJG/b21170482545ad8c93874d164fd97a90
 
-      - name: List clusters
+      - name: Push to repository
         env:
-          DATABRICKS_HOST: ${{ vars.AZURE_DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.AZURE_DATABRICKS_SP_TOKEN }}
+          GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         run: |
-          databricks repos list
-          databricks clusters list
+          cd ${{ inputs.project_name }}
+          git init -b main
+          git config user.email "mike.claure@gmail.com"
+          git config user.name "Oscar Mike"
+          git add .
+          git commit -m "Initialize the repository"
+          git remote add origin "https://osomike:$GH_TOKEN@github.com/osomike/${{ inputs.project_name }}.git"
+          git push -u origin main
